@@ -9,6 +9,8 @@ An API for accessing ACDH Dashboard data.
 
 ## Usage
 
+Issue a GET request to the location you deployed the service into.
+
 * required parameters:
     * `login` Redmine login (depending on the user account rights you can get different results)
     * `password` Redmine password
@@ -17,6 +19,8 @@ An API for accessing ACDH Dashboard data.
     * `apiBase` Redmine API base (defaults to `https://redmine.acdh.oeaw.ac.at`)
     * `skipAttributes` comma separated list of Redmine issues' attributes to be excluded from the output (defaults to `closed_on,created_on,done_ratio,due_date,ImprintParams,pid,QoS,start_date,updated_on`)
     * any parameter supported by the [Redmine's issues API](https://www.redmine.org/projects/redmine/wiki/Rest_Issues), e.g. `query_id`, `project_id`, etc. (defaults are `tracker_id=7` and `status_id=*`)
+
+Example: `https://qos.hephaistos.arz.oeaw.ac.at/login=foo&password=bar&format=nerv&query_id=2`
 
 ## Performance
 
