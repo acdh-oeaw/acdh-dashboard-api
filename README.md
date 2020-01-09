@@ -21,7 +21,7 @@ Issue a GET request to the location you deployed the service into.
     * any parameter supported by the [Redmine's issues API](https://www.redmine.org/projects/redmine/wiki/Rest_Issues), e.g. `query_id`, `project_id`, etc. (defaults are `tracker_id=7` and `status_id=*`)
         * be aware using Redmine queries affects also the list of returned attributes (only custom fields specified in the Redmine query are returned - this is the Redmine behaviour)
 
-Example: `https://qos.hephaistos.arz.oeaw.ac.at/login=foo&password=bar&format=nerv&query_id=2`
+Example: `https://qos.hephaistos.arz.oeaw.ac.at/?login=foo&password=bar&format=nerv&query_id=2`
 
 ## Performance
 
