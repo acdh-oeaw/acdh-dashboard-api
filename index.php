@@ -37,6 +37,8 @@ if (!isset($_SERVER['PHP_AUTH_USER'])) {
 }
 
 $apiBase = filter_input(INPUT_GET, 'redmineUrl') ?? 'https://redmine.acdh.oeaw.ac.at';
+$labelAttr = filter_input(INPUT_GET, 'labelAttr') ?? 'subject';
+$typeAttr = filter_input(INPUT_GET, 'typeAttr') ?? 'status';
 $auth = [$_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] ?? ''];
 $skipAttributes = filter_input(INPUT_GET, 'skipAttributes') ?? 'closed_on,created_on,done_ratio,due_date,ImprintParams,pid,QoS,start_date,updated_on';
 $skipAttributes = explode(',', $skipAttributes);
@@ -115,27 +117,35 @@ if ($format === 'csv') {
         }
         $i->id = 'n' . $i->id;
         if (!isset($dataNerv->nodes[$i->id])) {
-            $dataNerv->nodes[$i->id] = (object) ['id' => $i->id, 'label' => 'Issue ' . $i->id, 'type' => 'service'];
+            $dataNerv->nodes[$i->id] = (object) ['id' => $i->id, 'label' => '', 'type' => ''];
         }
-        if ($i->type === 'relation') {
-            $i->value = 'n' . $i->value;
-        } else {
-            $i->value = 'n' . preg_replace('[^a-zA-Z0-9]', '', $i->value);
+
+        if ($i->attribute === $labelAttr) {
+            $dataNerv->nodes[$i->id]->label = $i->value;
         }
+        if ($i->attribute === $typeAttr) {
+            $dataNerv->nodes[$i->id]->type = $i->value;
+        }
+
+        $i->valueId = 'n' . ($i->type === 'relation' ? $i->value : hash('sha1', $i->value));
         $i->attributeType = preg_replace('[^a-zA-Z0-9]', '', $i->attribute);
     }
     $edgesCount = 1;
+    $skipAttributes = array_merge($skipAttributes, $labelAttr, $typeAttr);
     foreach ($longData as $i) {
         if (in_array($i->attribute, $skipAttributes)) {
             continue;
         }
-        if (!isset($dataNerv->nodes[$i->value])) {
-            $dataNerv->nodes[$i->id] = (object) ['id' => $i->id, 'label' => 'Issue ' . $i->id, 'type' => $i->type === 'relation' ? 'issue' : 'value'];
+        if (!isset($dataNerv->nodes[$i->valueId])) {
+            $label = $i->type === 'relation' ? 'Issue ' . $i->value : $i->value;
+            $type = $i->type === 'relation' ? 'issue' : 'value';
+            $dataNerv->nodes[$i->valueId] = (object) ['id' => $i->valueId, 'label' => $label, 'type' => $type];
         }
         $dataNerv->edges[] = (object) ['id' => 'e' . $edgesCount, 'label' => $i->attribute, 'source' => $i->id, 'target' => $i->value, 'type' => $i->attributeType];
         $edgesCount++;
     }
     header('Content-Type: application/json');
+    $dataNerv->nodes = array_values($dataNerv->nodes);
     echo json_encode($dataNerv, JSON_PRETTY_PRINT);
 }
 
