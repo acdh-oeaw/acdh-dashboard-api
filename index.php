@@ -29,8 +29,15 @@ use GuzzleHttp\Psr7\Request;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+if (!isset($_SERVER['PHP_AUTH_USER'])) {
+    header('WWW-Authenticate: Basic realm="ACDH Dashboard"');
+    header('HTTP/1.0 401 Unauthorized');
+    echo 'Authentication required';
+    exit();
+}
+
 $apiBase = filter_input(INPUT_GET, 'redmineUrl') ?? 'https://redmine.acdh.oeaw.ac.at';
-$auth = [filter_input(INPUT_GET, 'login') ?? '', filter_input(INPUT_GET, 'password') ?? ''];
+$auth = [$_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] ?? ''];
 $skipAttributes = filter_input(INPUT_GET, 'skipAttributes') ?? 'closed_on,created_on,done_ratio,due_date,ImprintParams,pid,QoS,start_date,updated_on';
 $skipAttributes = explode(',', $skipAttributes);
 
@@ -42,7 +49,7 @@ if (!isset($_GET['status_id'])) {
 }
 $filters = '';
 foreach ($_GET as $k => $v) {
-    if (!in_array($k, ['login', 'password', 'format', 'redmineUrl', 'skipAttributes'])) {
+    if (!in_array($k, ['format', 'redmineUrl', 'skipAttributes'])) {
         $filters .= '&' . rawurlencode($k) . '=' . rawurlencode($v);
     }
 }
