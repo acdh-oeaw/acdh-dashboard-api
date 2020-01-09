@@ -102,6 +102,9 @@ if ($format === 'csv') {
     header('Content-Type: text/csv');
     echo "id,attribute,type,value\n";
     foreach ($longData as $i) {
+        if (in_array($i->attribute, $skipAttributes)) {
+            continue;
+        }
         echo $i->id . ',"' . str_replace('"', '""', $i->attribute) . '",' . $i->type . ',' . (is_string($i->value) ? '"' . str_replace('"', '""', $i->value) . '"' : $i->value) . "\n";
     }
 } elseif ($format === 'nerv') {
