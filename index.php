@@ -29,6 +29,9 @@ use GuzzleHttp\Psr7\Request;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Headers: X-Requested-With, Content-Type');
+
 if (!isset($_SERVER['PHP_AUTH_USER'])) {
     header('WWW-Authenticate: Basic realm="ACDH Dashboard"');
     header('HTTP/1.0 401 Unauthorized');
