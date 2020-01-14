@@ -141,7 +141,7 @@ if ($format === 'csv') {
         $i->attributeType = preg_replace('[^a-zA-Z0-9]', '', $i->attribute);
     }
     $edgesCount = 1;
-    $skipAttributes = array_merge($skipAttributes, $labelAttr, $typeAttr);
+    $skipAttributes = array_merge($skipAttributes, [$labelAttr, $typeAttr]);
     foreach ($longData as $i) {
         if (in_array($i->attribute, $skipAttributes)) {
             continue;
