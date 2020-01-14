@@ -151,7 +151,7 @@ if ($format === 'csv') {
             $type = $i->type === 'relation' ? 'issue' : 'value';
             $dataNerv->nodes[$i->valueId] = (object) ['id' => $i->valueId, 'label' => $label, 'type' => $type];
         }
-        $dataNerv->edges[] = (object) ['id' => 'e' . $edgesCount, 'label' => $i->attribute, 'source' => $i->id, 'target' => $i->value, 'type' => $i->attributeType];
+        $dataNerv->edges[] = (object) ['id' => 'e' . $edgesCount, 'label' => $i->attribute, 'source' => $i->id, 'target' => $i->valueId, 'type' => $i->attributeType];
         $edgesCount++;
     }
     header('Content-Type: application/json');
