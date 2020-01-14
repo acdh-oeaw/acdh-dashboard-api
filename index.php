@@ -65,11 +65,15 @@ foreach ($_GET as $k => $v) {
         $filters .= '&' . rawurlencode($k) . '=' . rawurlencode($v);
     }
 }
-$client = new Client(['auth' => $auth]);
+$client = new Client(['auth' => $auth, 'http_errors' => false]);
 $rawData = [];
 $offset = 0;
 do {
     $resp = $client->send(new Request('get', "$apiBase/issues.json?include=relations&limit=1000&offset=$offset$filters"));
+    if ($resp->getStatusCode() !== 200) {
+        http_response_code($resp->getStatusCode());
+        exit((string) $resp->getBody());
+    }
     $dataTmp = json_decode($resp->getBody());
     $offset += count($dataTmp->issues);
     $rawData = array_merge($rawData, $dataTmp->issues);
