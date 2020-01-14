@@ -30,7 +30,14 @@ use GuzzleHttp\Psr7\Request;
 require_once __DIR__ . '/vendor/autoload.php';
 
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Headers: X-Requested-With, Content-Type');
+header('Access-Control-Allow-Headers: *');
+header('Access-Control-Allow-Methods: GET, OPTIONS');
+
+if (filter_input(INPUT_SERVER, 'REQUEST_METHOD') === 'OPTIONS') {
+    http_response_code(204);
+    header('Allow: GET, OPTIONS');
+    exit();
+}
 
 if (!isset($_SERVER['PHP_AUTH_USER'])) {
     header('WWW-Authenticate: Basic realm="ACDH Dashboard"');
