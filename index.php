@@ -152,7 +152,7 @@ if ($format === 'csv') {
         }
         if (!isset($dataNerv->nodes[$i->valueId])) {
             $label = $i->type === 'relation' ? 'Issue ' . $i->value : $i->value;
-            $type = $i->type === 'relation' ? 'issue' : 'value';
+            $type = $i->type === 'relation' ? 'issue' : $i->attributeType;
             $dataNerv->nodes[$i->valueId] = (object) ['id' => $i->valueId, 'label' => $label, 'type' => $type];
         }
         $dataNerv->edges[] = (object) ['id' => 'e' . $edgesCount, 'label' => $i->attribute, 'source' => $i->id, 'target' => $i->valueId, 'type' => $i->attributeType];
