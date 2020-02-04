@@ -21,6 +21,7 @@ Issue a GET request to the location you deployed the service into.
         * be aware using Redmine queries affects also the list of returned attributes (only custom fields specified in the Redmine query are returned - this is the Redmine behaviour)
     * `labelAttr` (`nerv` output format only, defaults to `subject`, can be set to an empty string) Redmine issue attribute to be used as a node value
     * `typeAttr` (`nerv` output format only, defaults to `state`, can be set to an empty string) Redmine issue attribute to be used as a node type
+    * `issueSubjectResolution` (`0` or `1`, defaults to `1`) should subjects of Redmine issues denoted only with an issue id be resolved? Turning on (the default behaviour) significantly slows down the request execution (as every resource's subject has to be fetched in a separate HTTP request). When turned off issues which are referrenced from matched issues but not included in the matched issues set will have `Issue {ID}` labels instead of subject labels.
 
 Example: `https://qos.hephaistos.arz.oeaw.ac.at/?login=foo&password=bar&format=nerv&query_id=2`
 

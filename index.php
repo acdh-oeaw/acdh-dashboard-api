@@ -33,6 +33,9 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: *');
 header('Access-Control-Allow-Methods: GET, OPTIONS');
 
+$issueAttributes = ['parent'];
+$userAttributes  = ['Assignees'];
+
 if (filter_input(INPUT_SERVER, 'REQUEST_METHOD') === 'OPTIONS') {
     http_response_code(204);
     header('Allow: GET, OPTIONS');
@@ -52,6 +55,7 @@ $typeAttr = filter_input(INPUT_GET, 'typeAttr') ?? 'status';
 $auth = [$_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] ?? ''];
 $skipAttributes = filter_input(INPUT_GET, 'skipAttributes') ?? 'closed_on,created_on,done_ratio,due_date,ImprintParams,pid,QoS,start_date,updated_on';
 $skipAttributes = explode(',', $skipAttributes);
+$issueSubjectResolution = (bool) (filter_input(INPUT_GET, 'issueSubjectResolution') ?? true);
 
 if (!isset($_GET['tracker_id'])) {
     $_GET['tracker_id'] = 7;
@@ -78,6 +82,34 @@ do {
     $offset += count($dataTmp->issues);
     $rawData = array_merge($rawData, $dataTmp->issues);
 } while (count($dataTmp->issues) > 0);
+
+$users = [];
+$offset = 0;
+do {
+    $resp = $client->send(new Request('get', "$apiBase/users.json?limit=1000&offset=$offset"));
+    if ($resp->getStatusCode() !== 200) {
+        http_response_code($resp->getStatusCode());
+        exit((string) $resp->getBody());
+    }
+    $dataTmp = json_decode($resp->getBody());
+    $offset += count($dataTmp->users);
+    foreach ($dataTmp->users as $i) {
+        $users[(string) $i->id] = trim($i->firstname . ' ' . $i->lastname);
+    }
+} while (count($dataTmp->users) > 0);
+
+function getIssueSubject($id) {
+    global $apiBase, $client, $issueSubjectResolution;
+    static $cache = [];
+    $id = (string) $id;
+    if (!isset($cache[$id]) && $issueSubjectResolution) {
+        $resp = $client->send(new Request('get', "$apiBase/issues/$id.json"));
+        if ($resp->getStatusCode() === 200) {
+            $cache[$id] = json_decode((string) $resp->getBody())->issue->subject;
+        }
+    }
+    return $cache[$id] ?? "Issue $id";
+}
 
 $longData = [];
 foreach ($rawData as $i) {
@@ -151,7 +183,12 @@ if ($format === 'csv') {
             continue;
         }
         if (!isset($dataNerv->nodes[$i->valueId])) {
-            $label = $i->type === 'relation' ? 'Issue ' . $i->value : $i->value;
+            $label = $i->value;
+            if ($i->type === 'relation' || in_array($i->attribute, $issueAttributes)) {
+                $label =  getIssueSubject($i->value);
+            } elseif (in_array($i->attribute, $userAttributes)) {
+                $label = $users[(string) $i->value] ?? $i->value;
+            }
             $type = $i->type === 'relation' ? 'issue' : $i->attributeType;
             $dataNerv->nodes[$i->valueId] = (object) ['id' => $i->valueId, 'label' => $label, 'type' => $type];
         }
